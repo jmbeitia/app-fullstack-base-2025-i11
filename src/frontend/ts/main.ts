@@ -6,7 +6,8 @@ interface Mostrable{
 class Main implements Mostrable{
 
     public mostrarInfo(): string {
-        return "Estoy en el MAIN!";
+        console.log("Estoy en el MAIN!");
+        return "";
     }
 }
 
@@ -29,23 +30,11 @@ window.addEventListener("load", () => {
     mostrables.push(per2);
     mostrables.push(main);
     mostrables.push(usr1);
-    
-    for (let m of mostrables) {
-     console.log(m.mostrarInfo())
- }
+
         
     let btn = document.getElementById("btn_1");
 
-    btn.addEventListener("click", () => {
-        for (let p of personas) {
-            if (p instanceof Usuario) {
-                let u = <Usuario>p;
-                alert("Soy un usuario " + u.verMail());
-            } else {
-                alert("Hola "+p.obtenerDatos())
-            }
-        }
-    });
+    btn.addEventListener("click", main.mostrarInfo);
    
 });
 
