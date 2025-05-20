@@ -1,40 +1,75 @@
-interface Mostrable{
 
-    mostrarInfo(): string;
-}
-
-class Main implements Mostrable{
-
-    public mostrarInfo(): string {
-        console.log("Estoy en el MAIN!");
-        return "";
+class Main implements EventListenerObject{
+    nombre: string = "Matias";
+    per: Persona = new Persona("", 3);
+    
+    
+    public mostrarEnConsola( mensaje: string) {
+        console.log(mensaje);
     }
+    handleEvent(object: Event): void{
+        console.log(object)
+        let elementoClick =<HTMLInputElement> object.target;
+
+        if(elementoClick.id=="btn_1"){
+           this.per.obtenerDatos()
+            
+        } else if(elementoClick.id=="btnMostrar" && object.type=="click"){
+            this.consultarAlServidor();
+        } else {
+            console.log("pase por el boton!")
+        }
+
+    }
+    
+    public consultarAlServidor() {
+        let xmlReq = new XMLHttpRequest();
+
+        xmlReq.onreadystatechange = () => {
+            if (xmlReq.readyState == 4) {
+                if (xmlReq.status == 200) {
+                    console.log(xmlReq.responseText);
+                    let textArea = document.getElementById("textarea_1");
+                    textArea.innerHTML = xmlReq.responseText;
+                    
+                    let devices:Array<Device> = JSON.parse(xmlReq.responseText);
+                    for (let o of devices) {
+                        console.log(o.id);    
+                        console.log(o.name);    
+                        console.log(o.description); 
+                        console.log(o.state);
+                    }
+
+                    let div = document.getElementById("lista");
+                    div.innerHTML = "<h1>Titulo</h1>"
+                    div.innerHTML += "<p> descripcion</p>"
+                    div.innerHTML+="<input type='button'>"
+                    
+                } else {
+                    
+                    alert("fallo la consulta");
+                }
+            }
+        }
+   
+        xmlReq.open("GET", "http://localhost:8000/devices", true);
+        let oJson ={name:"nombre",passwo:"sdasadas"}
+        xmlReq.send(JSON.stringify(oJson));
+
+    }
+    
 }
 
 window.addEventListener("load", () => {
-    let current_value = document.getElementById("textarea_1") as HTMLInputElement;
-    let new_value = "Hola mundo !!!" + "\n" + current_value.value;
-    document.getElementById("textarea_1").innerHTML = new_value;
-
-    let per2: Persona = new Persona("Jose",245456);
-    let per3: Persona = new Persona("Pedro", 123213);
-    let usr1: Usuario = new Usuario("Matias", 32132,"mramos@asda.com");;
-    let main: Main = new Main();
-    let personas: Array<Persona> = new Array();
-    personas.push(per2);
-    personas.push(per3);
-    personas.push(usr1);
-
-   
-    let mostrables: Array<Mostrable> = new Array();
-    mostrables.push(per2);
-    mostrables.push(main);
-    mostrables.push(usr1);
-
-        
+   let main: Main = new Main();
+     
     let btn = document.getElementById("btn_1");
+   // let o: EventListenerObject = main;
+    btn.addEventListener("click", main);
+    let btnM = document.getElementById("btnMostrar");
 
-    btn.addEventListener("click", main.mostrarInfo);
+   // btnM.addEventListener("mouseover", main);
+    btnM.addEventListener("click", main);
    
 });
 
