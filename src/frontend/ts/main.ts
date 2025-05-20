@@ -41,6 +41,11 @@ class Main implements EventListenerObject{
                     }
 
                     let div = document.getElementById("lista");
+                    /**
+                     * Aca deberian  mostra la lista de dispositivos utilizando 
+                     * etiquetas <h1> <p> <li> <ul>
+                     * 
+                     */
                     div.innerHTML = "<h1>Titulo</h1>"
                     div.innerHTML += "<p> descripcion</p>"
                     div.innerHTML+="<input type='button'>"
