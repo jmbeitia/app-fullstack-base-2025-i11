@@ -12,7 +12,17 @@ class Main implements EventListenerObject{
         let elementoClick =<HTMLInputElement> object.target;
 
         if(elementoClick.id=="btn_1"){
-           this.per.obtenerDatos()
+            let tiluto = document.getElementById("titulo1");
+            let texto =<HTMLInputElement> document.getElementById("texto1");
+            
+            tiluto.innerHTML = " titulo nuevo";
+            let nombre = texto.value;
+            texto.hidden = true;
+            console.log(texto.setAttribute("otro","otro valor!"));
+            alert("el usuario es " + nombre);
+            let div = document.getElementById("lista");
+            div.hidden = true;
+
             
         } else if(elementoClick.id=="btnMostrar" && object.type=="click"){
             this.consultarAlServidor();
@@ -29,26 +39,29 @@ class Main implements EventListenerObject{
             if (xmlReq.readyState == 4) {
                 if (xmlReq.status == 200) {
                     console.log(xmlReq.responseText);
-                    let textArea = document.getElementById("textarea_1");
-                    textArea.innerHTML = xmlReq.responseText;
                     
-                    let devices:Array<Device> = JSON.parse(xmlReq.responseText);
-                    for (let o of devices) {
-                        console.log(o.id);    
-                        console.log(o.name);    
-                        console.log(o.description); 
-                        console.log(o.state);
-                    }
-
+                    
+                    let devices: Array<Device> = JSON.parse(xmlReq.responseText);
                     let div = document.getElementById("lista");
+                    div.innerHTML = "";
+                    let listado: string = ""
+        
+                    for (let o of devices) {
+                        listado+="<div class='col s12 m6 l6 xl4'>"
+                        listado += `<h3>${o.name}</h3><p>${o.description}</p>`
+                        listado += "<input type='button' value='On/OFF'>"
+                        listado += "</div>";
+             
+                    }
+                    div.innerHTML = listado;
+
+                    
                     /**
                      * Aca deberian  mostra la lista de dispositivos utilizando 
                      * etiquetas <h1> <p> <li> <ul>
                      * 
                      */
-                    div.innerHTML = "<h1>Titulo</h1>"
-                    div.innerHTML += "<p> descripcion</p>"
-                    div.innerHTML+="<input type='button'>"
+                  
                     
                 } else {
                     
@@ -58,8 +71,7 @@ class Main implements EventListenerObject{
         }
    
         xmlReq.open("GET", "http://localhost:8000/devices", true);
-        let oJson ={name:"nombre",passwo:"sdasadas"}
-        xmlReq.send(JSON.stringify(oJson));
+        xmlReq.send();
 
     }
     

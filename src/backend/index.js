@@ -29,6 +29,13 @@ app.get('/devices/', function(req, res, next) {
             'state': 1, 
             'type': 2, 
         },
+        { 
+            'id': 3, 
+            'name': 'Ventana', 
+            'description': 'de la cocina', 
+            'state': 1, 
+            'type': 2, 
+        }
     ]
     res.send(JSON.stringify(devices)).status(200);
 });
