@@ -25,9 +25,13 @@ class Main implements EventListenerObject{
 
             
         } else if(elementoClick.id=="btnMostrar" && object.type=="click"){
-            this.consultarAlServidor();
-        } else {
-            console.log("pase por el boton!")
+            this.consultarAlServidor();                                    
+        } else if(elementoClick.id.startsWith("cb_")){                
+                         // <input id='cb_1' type="checkbox"> // true //cb_1
+            console.log("pase por el check!!", elementoClick.checked, elementoClick.id)
+            console.log(elementoClick.id.substring(3, elementoClick.id.length));
+            console.log(elementoClick)
+            console.log(elementoClick.getAttribute("miIdBd"));
         }
 
     }
@@ -45,24 +49,50 @@ class Main implements EventListenerObject{
                     let div = document.getElementById("lista");
                     div.innerHTML = "";
                     let listado: string = ""
-        
+                    
                     for (let o of devices) {
-                        listado+="<div class='col s12 m6 l6 xl4'>"
-                        listado += `<h3>${o.name}</h3><p>${o.description}</p>`
-                        listado += "<input type='button' value='On/OFF'>"
-                        listado += "</div>";
+                        
+                        listado += "<li class='collection-item avatar'>"
+                        if (o.type == 1) {
+                            
+                            listado += `<img src="./static/images/lightbulb.png" alt="" class="circle">`
+                        } else {
+                            listado += `<img src="./static/images/window.png" alt="" class="circle">`
+                        }
+                        listado += `<span class="title">${o.name}</span>`
+                        listado += ` <p>${o.description}</p>`
+                        if (o.state) {
+                            listado += `<a href="#!" class="secondary-content">
+                            <div class="switch">
+                                <label>
+                                Off
+                                <input id='cb_${o.id}' miIdBd='${o.id}' checked type="checkbox">
+                                <span class="lever"></span>
+                                On
+                                </label>
+                            </div>
+                            </a>`
+                        } else {
+                            listado += `<a href="#!" class="secondary-content">
+                            <div class="switch">
+                                <label>
+                                Off
+                                <input id='cb_${o.id}' type="checkbox">
+                                <span class="lever"></span>
+                                On
+                                </label>
+                            </div>
+                            </a>`
+                        }
+                        listado += '</li>';
              
                     }
                     div.innerHTML = listado;
 
-                    
-                    /**
-                     * Aca deberian  mostra la lista de dispositivos utilizando 
-                     * etiquetas <h1> <p> <li> <ul>
-                     * 
-                     */
-                  
-                    
+                    for (let o of devices) {
+                        let checkbox = document.getElementById("cb_" + o.id);
+                        checkbox.addEventListener("click", this);
+                    }
                 } else {
                     
                     alert("fallo la consulta");
