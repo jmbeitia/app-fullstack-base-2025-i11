@@ -117,6 +117,27 @@ window.addEventListener("load", () => {
 
    // btnM.addEventListener("mouseover", main);
     btnM.addEventListener("click", main);
+
+
+     let xmlReq = new XMLHttpRequest();
+
+ 
+    xmlReq.onreadystatechange = () => {
+        if (xmlReq.readyState == 4) {
+            if (xmlReq.status == 200) {
+                console.log(xmlReq.responseText);
+            } else {
+                alert(xmlReq.responseText);
+            }
+        }
+    }
+    let body = { 'nombre': "Matias!"}
+    xmlReq.open("POST", "http://localhost:8000/algoInfoBody/", true);
+
+    xmlReq.setRequestHeader("Content-Type", "application/json");
+
+    xmlReq.send(JSON.stringify(body));
+        
    
 });
 
