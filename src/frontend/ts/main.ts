@@ -32,6 +32,8 @@ class Main implements EventListenerObject{
             console.log(elementoClick.id.substring(3, elementoClick.id.length));
             console.log(elementoClick)
             console.log(elementoClick.getAttribute("miIdBd"));
+            // TODO para la semana que viene
+            // llegar al backend y hacer un update a la tabla devices Con el id y el state;
         }
 
     }
