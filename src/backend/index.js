@@ -36,6 +36,25 @@ app.get('/devices/:id', function(req, res, next) {
         }
     })
 });
+app.post('/devices', function (req, res) {
+    let { name, description, type, state } = req.body;
+
+    if (!name || !description || typeof type === 'undefined' || typeof state === 'undefined') {
+        res.status(400).send({ error: 'Datos incompletos' });
+        return;
+    }
+
+    const query = `INSERT INTO Devices (name, description, type, state) VALUES (?, ?, ?, ?)`;
+    utils.query(query, [name, description, type, state], function (error, results) {
+        if (!error) {
+            res.status(201).send({ message: 'Dispositivo creado', id: results.insertId });
+        } else {
+            console.log(error);
+            res.status(500).send({ error: 'Error al insertar el dispositivo' });
+        }
+    }); 
+});
+
 app.get('/algo',function(req,res,next){
 
     console.log("llego una peticion a algo")
