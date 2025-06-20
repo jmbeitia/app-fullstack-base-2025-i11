@@ -10,8 +10,7 @@ services:
         command:                 "tsc --project /workspace --outDir /output --watch --pretty true"
 
     mysql-server:
-    #   arm64v8/mysql para mac
-        image:                   mysql:5.7 
+        image:                   arm64v8/mysql
         hostname:                mysql-server
         environment:
             MYSQL_ROOT_PASSWORD: userpass
