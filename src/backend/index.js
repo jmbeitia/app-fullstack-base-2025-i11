@@ -71,6 +71,38 @@ app.delete('/devices/:id', function (req, res) {
         }
     });
 });
+app.put('/devices/:id', function (req, res) {
+    const deviceId = req.params.id;
+    const updateFields = req.body;
+
+    if (Object.keys(updateFields).length === 0) {
+        return res.status(400).send({ error: 'No se enviaron campos para actualizar' });
+    }
+
+    const keys = Object.keys(updateFields);
+    const values = Object.values(updateFields);
+
+    const setClause = keys.map(key => `${key} = ?`).join(', ');
+    const query = `UPDATE Devices SET ${setClause} WHERE id = ?`;
+
+    values.push(deviceId);
+
+    utils.query(query, values, function (error, result) {
+        if (!error) {
+            if (result.affectedRows > 0) {
+                res.status(200).send({
+                    message: 'Dispositivo actualizado',
+                    updated_fields: updateFields
+                });
+            } else {
+                res.status(404).send({ error: 'Dispositivo no encontrado' });
+            }
+        } else {
+            console.error(error);
+            res.status(500).send({ error: 'Error en la actualización del dispositivo' });
+        }
+    });
+});
 app.get('/algo',function(req,res,next){
 
     console.log("llego una peticion a algo")
