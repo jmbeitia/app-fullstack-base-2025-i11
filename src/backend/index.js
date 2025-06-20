@@ -25,17 +25,6 @@ app.get('/devices/', function(req, res, next) {
         }
     })
 });
-app.get('/devices/:id', function(req, res, next) {
-    utils.query("SELECT * FROM Devices where id = "+req.params.id, function(error,respuesta,campos){
-        if(error==null){
-            console.log(respuesta);
-            res.status(200).send(respuesta);    
-        }else{
-            console.log(error);
-            res.status(409).send({error:"Fallo la consulta"});
-        }
-    })
-});
 app.post('/devices', function (req, res) {
     let { name, description, type, state } = req.body;
 
@@ -54,7 +43,34 @@ app.post('/devices', function (req, res) {
         }
     }); 
 });
+app.get('/devices/:id', function(req, res, next) {
+    utils.query("SELECT * FROM Devices where id = "+req.params.id, function(error,respuesta,campos){
+        if(error==null){
+            console.log(respuesta);
+            res.status(200).send(respuesta);    
+        }else{
+            console.log(error);
+            res.status(409).send({error:"Fallo la consulta"});
+        }
+    })
+});
+app.delete('/devices/:id', function (req, res) {
+    const deviceId = req.params.id;
 
+    const query = `DELETE FROM Devices WHERE id = ?`;
+    utils.query(query, [deviceId], function (error, result) {
+        if (!error) {
+            if (result.affectedRows > 0) {
+                res.status(200).send({ message: 'Dispositivo eliminado' });
+            } else {
+                res.status(404).send({ error: 'Dispositivo no encontrado' });
+            }
+        } else {
+            console.log(error);
+            res.status(500).send({ error: 'Error al eliminar el dispositivo' });
+        }
+    });
+});
 app.get('/algo',function(req,res,next){
 
     console.log("llego una peticion a algo")
