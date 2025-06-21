@@ -95,7 +95,37 @@
                     </div>
                 </div>
             </div>	
+            <a class="btn-floating btn-large red" id="btnAbrirAgregar" style="position: fixed; bottom: 30px; right: 30px; display: none;">
+                <i class="material-icons">add</i>
+            </a>
         </main>
+
+        <!-- Modal para agregar dispositivo -->
+
+        <div id="modalAgregar" class="modal">
+        <div class="modal-content">
+            <h4>Agregar dispositivo</h4>
+            <div class="input-field">
+            <input id="newName" type="text">
+            <label for="newName">Nombre</label>
+            </div>
+            <div class="input-field">
+            <input id="newDescription" type="text">
+            <label for="newDescription">Descripción</label>
+            </div>
+            <div class="input-field">
+            <select id="newType">
+                <option value="1">Lámpara</option>
+                <option value="2">Cortina u otros</option>
+            </select>
+            <label for="newType">Tipo</label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="btnAgregarDispositivo" class="btn waves-effect waves-light">Agregar</button>
+        </div>
+        </div>
+
 
         <!-- Modal para editar dispositivo -->
         <div id="modalEditar" class="modal">

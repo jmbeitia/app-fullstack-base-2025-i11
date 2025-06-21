@@ -102,11 +102,23 @@ class Main implements EventListenerObject{
                                 <i class="material-icons">edit</i>
                             </a>
                         `;
+                        listado += `
+                            <a class="btn-floating btn-small red delete-btn" data-id="${o.id}" title="Eliminar">
+                                <i class="material-icons">delete</i>
+                            </a>
+                        `;
                         listado += `</div>`; 
                         listado += "</li>";
                     }
 
                     div.innerHTML = listado;
+
+                    const btnAgregar = document.getElementById("btnAbrirAgregar");
+                    if (devices.length > 0) {
+                        btnAgregar!.style.display = "block";
+                    } else {
+                        btnAgregar!.style.display = "none";
+                    }
 
                     const editButtons = document.querySelectorAll(".edit-btn");
                     editButtons.forEach(btn => {
@@ -128,6 +140,28 @@ class Main implements EventListenerObject{
 
                             const modal = document.getElementById("modalEditar");
                             M.Modal.getInstance(modal!).open();
+                        });
+                    });
+
+                    const deleteButtons = document.querySelectorAll(".delete-btn");
+                    deleteButtons.forEach(btn => {
+                        btn.addEventListener("click", () => {
+                            const id = (btn as HTMLElement).getAttribute("data-id");
+                            const name = btn.closest("li")?.querySelector(".title")?.textContent?.trim() || "Desconocido";
+                            if (confirm(`¿Eliminar dispositivo "${name}"?`)) {
+                                fetch(`/devices/${id}`, {
+                                    method: "DELETE"
+                                })
+                                .then(res => res.json())
+                                .then(data => {
+                                    M.toast({ html: `Dispositivo "${name}" eliminado`, classes: "green" });
+                                    this.consultarAlServidor();
+                                })
+                                .catch(err => {
+                                    M.toast({ html: `Error al eliminar`, classes: "red" });
+                                    console.error(err);
+                                });
+                            }
                         });
                     });
 
@@ -198,6 +232,34 @@ window.addEventListener("load", () => {
             });
         }
     });
+    
+    document.getElementById("btnAbrirAgregar")?.addEventListener("click", () => {
+        const modal = document.getElementById("modalAgregar");
+        M.Modal.getInstance(modal!).open();
+    });
+
+    document.getElementById("btnAgregarDispositivo")?.addEventListener("click", () => {
+        const name = (document.getElementById("newName") as HTMLInputElement).value;
+        const description = (document.getElementById("newDescription") as HTMLInputElement).value;
+        const type = parseInt((document.getElementById("newType") as HTMLSelectElement).value);
+
+        fetch("/devices", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, description, type, state: 0 })
+        })
+        .then(res => res.json())
+        .then(data => {
+            M.toast({ html: "Dispositivo agregado", classes: "green" });
+            M.Modal.getInstance(document.getElementById("modalAgregar")!).close();
+            main.consultarAlServidor();
+        })
+        .catch(err => {
+            M.toast({ html: "Error al agregar", classes: "red" });
+            console.error(err);
+        });
+    });
+
 
      let xmlReq = new XMLHttpRequest();
 
