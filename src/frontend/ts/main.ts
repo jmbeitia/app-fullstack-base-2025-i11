@@ -85,18 +85,29 @@ class Main implements EventListenerObject{
                             ? `<img src="./static/images/lightbulb.png" alt="" class="circle">`
                             : `<img src="./static/images/window.png" alt="" class="circle">`;
                         listado += `<span class="title">${o.name}</span>`;
-                        listado += `<p>${o.description}</p>`;                        // Botones alineados a la derecha
+                        listado += `<p>${o.description}</p>`;
                         listado += `<div class="secondary-content" style="display: flex; gap: 10px; align-items: center;">`;
-                        listado += `
-                            <div class="switch">
-                                <label>
-                                    Off
-                                    <input id='cb_${o.id}' miIdBd='${o.id}' ${o.state ? "checked" : ""} type="checkbox">
-                                    <span class="lever"></span>
-                                    On
-                                </label>
-                            </div>
-                        `;
+                        if (o.dimerizable) {
+                            listado += `
+                                <div style="width: 150px; margin-right: 15px;">
+                                    <p class="range-field">
+                                        <input type="range" id="rg_${o.id}" miIdBd="${o.id}" min="0" max="1" step="0.01" value="${o.state}">
+                                    </p>
+                                </div>
+                            `;
+                        } else {
+                            listado += `
+                                <div class="switch">
+                                    <label>
+                                        Off
+                                        <input id='cb_${o.id}' miIdBd='${o.id}' ${o.state ? "checked" : ""} type="checkbox">
+                                        <span class="lever"></span>
+                                        On
+                                    </label>
+                                </div>
+                            `;
+                        }
+
                         listado += `
                             <a class="btn-floating btn-small blue edit-btn" data-id="${o.id}" title="Editar">
                                 <i class="material-icons">edit</i>
@@ -132,6 +143,9 @@ class Main implements EventListenerObject{
                             (document.getElementById("editName") as HTMLInputElement).value = name;
                             (document.getElementById("editDescription") as HTMLInputElement).value = description;
                             (document.getElementById("editType") as HTMLSelectElement).value = isLamp ? "1" : "2";
+                            
+                            const isDimerizable = li?.querySelector("input[type='range']") !== null;
+(                           document.getElementById("editDimerizable") as HTMLInputElement).checked = isDimerizable;
 
                             M.updateTextFields();
                             M.FormSelect.init(document.querySelectorAll("select"));
@@ -167,8 +181,33 @@ class Main implements EventListenerObject{
 
                     for (let o of devices) {
                         let checkbox = document.getElementById("cb_" + o.id);
-                        checkbox.addEventListener("click", this);
+                        if (checkbox) {
+                            checkbox.addEventListener("click", this);
+                        }
                     }
+
+                    const sliders = document.querySelectorAll("input[type='range']");
+                    sliders.forEach(slider => {
+                        slider.addEventListener("change", () => {
+                            const id = slider.getAttribute("miIdBd");
+                            const valor = parseFloat((slider as HTMLInputElement).value);
+
+                            fetch(`/devices/${id}`, {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ state: valor })
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                M.toast({ html: `Estado actualizado a ${valor}`, classes: "green" });
+                            })
+                            .catch(err => {
+                                M.toast({ html: "Error al actualizar", classes: "red" });
+                                console.error(err);
+                            });
+                        });
+                    });
+
                 } else {
                     
                     alert("fallo la consulta");
@@ -207,14 +246,15 @@ window.addEventListener("load", () => {
         const name = (document.getElementById("editName") as HTMLInputElement).value;
         const description = (document.getElementById("editDescription") as HTMLInputElement).value;
         const type = parseInt((document.getElementById("editType") as HTMLSelectElement).value);
-        console.log("Guardando edición:", { id, name, description, type });
+        const dimerizable = (document.getElementById("editDimerizable") as HTMLInputElement).checked;
+        console.log("Guardando edición:", { id, name, description, type, dimerizable });
         if (id) {
             fetch(`/devices/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ name, description, type })
+                body: JSON.stringify({ name, description, type, dimerizable })
             })
             .then(res => res.json())
             .then(data => {
@@ -232,7 +272,7 @@ window.addEventListener("load", () => {
             });
         }
     });
-    
+
     document.getElementById("btnAbrirAgregar")?.addEventListener("click", () => {
         const modal = document.getElementById("modalAgregar");
         M.Modal.getInstance(modal!).open();
@@ -242,11 +282,13 @@ window.addEventListener("load", () => {
         const name = (document.getElementById("newName") as HTMLInputElement).value;
         const description = (document.getElementById("newDescription") as HTMLInputElement).value;
         const type = parseInt((document.getElementById("newType") as HTMLSelectElement).value);
+        const dimerizable = (document.getElementById("newDimerizable") as HTMLInputElement).checked;
+        console.log("Agregando dispositivo:", { name, description, type, dimerizable });
 
         fetch("/devices", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, description, type, state: 0 })
+            body: JSON.stringify({ name, description, type, state: 0, dimerizable })
         })
         .then(res => res.json())
         .then(data => {
