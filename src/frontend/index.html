@@ -96,6 +96,32 @@
                 </div>
             </div>	
         </main>
+
+        <!-- Modal para editar dispositivo -->
+        <div id="modalEditar" class="modal">
+            <div class="modal-content">
+                <h4>Editar dispositivo</h4>
+                <div class="input-field">
+                <input id="editName" type="text" />
+                <label for="editName">Nombre</label>
+                </div>
+                <div class="input-field">
+                <input id="editDescription" type="text" />
+                <label for="editDescription">Descripción</label>
+                </div>
+                <div class="input-field">
+                <select id="editType">
+                    <option value="1">Lámpara</option>
+                    <option value="2">Cortina u otros</option>
+                </select>
+                <label for="editType">Tipo</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="btnGuardarEdicion" class="waves-effect waves-green btn">Guardar</button>
+            </div>
+        </div>
+
 		<!-- Page Footer -->
         <footer class="page-footer" style="background-color:#124580">
             <div class="container">

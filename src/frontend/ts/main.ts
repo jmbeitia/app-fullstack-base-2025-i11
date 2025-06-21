@@ -80,43 +80,56 @@ class Main implements EventListenerObject{
                     let listado: string = ""
                     
                     for (let o of devices) {
-                        
-                        listado += "<li class='collection-item avatar'>"
-                        if (o.type == 1) {
-                            
-                            listado += `<img src="./static/images/lightbulb.png" alt="" class="circle">`
-                        } else {
-                            listado += `<img src="./static/images/window.png" alt="" class="circle">`
-                        }
-                        listado += `<span class="title">${o.name}</span>`
-                        listado += ` <p>${o.description}</p>`
-                        if (o.state) {
-                            listado += `<a href="#!" class="secondary-content">
+                        listado += "<li class='collection-item avatar'>";
+                        listado += o.type == 1
+                            ? `<img src="./static/images/lightbulb.png" alt="" class="circle">`
+                            : `<img src="./static/images/window.png" alt="" class="circle">`;
+                        listado += `<span class="title">${o.name}</span>`;
+                        listado += `<p>${o.description}</p>`;                        // Botones alineados a la derecha
+                        listado += `<div class="secondary-content" style="display: flex; gap: 10px; align-items: center;">`;
+                        listado += `
                             <div class="switch">
                                 <label>
-                                Off
-                                <input id='cb_${o.id}' miIdBd='${o.id}' checked type="checkbox">
-                                <span class="lever"></span>
-                                On
+                                    Off
+                                    <input id='cb_${o.id}' miIdBd='${o.id}' ${o.state ? "checked" : ""} type="checkbox">
+                                    <span class="lever"></span>
+                                    On
                                 </label>
                             </div>
-                            </a>`
-                        } else {
-                            listado += `<a href="#!" class="secondary-content">
-                            <div class="switch">
-                                <label>
-                                Off
-                                <input id='cb_${o.id}' miIdBd='${o.id}' type="checkbox">
-                                <span class="lever"></span>
-                                On
-                                </label>
-                            </div>
-                            </a>`
-                        }
-                        listado += '</li>';
-             
+                        `;
+                        listado += `
+                            <a class="btn-floating btn-small blue edit-btn" data-id="${o.id}" title="Editar">
+                                <i class="material-icons">edit</i>
+                            </a>
+                        `;
+                        listado += `</div>`; 
+                        listado += "</li>";
                     }
+
                     div.innerHTML = listado;
+
+                    const editButtons = document.querySelectorAll(".edit-btn");
+                    editButtons.forEach(btn => {
+                        btn.addEventListener("click", (event) => {
+                            const id = (btn as HTMLElement).getAttribute("data-id");
+                            const li = btn.closest("li");
+                            const name = li?.querySelector(".title")?.textContent?.trim() || "";
+                            const description = li?.querySelector("p")?.textContent?.trim() || "";
+                            const isLamp = li?.querySelector("img")?.getAttribute("src")?.includes("lightbulb") || false;
+
+                            (document.getElementById("editName") as HTMLInputElement).value = name;
+                            (document.getElementById("editDescription") as HTMLInputElement).value = description;
+                            (document.getElementById("editType") as HTMLSelectElement).value = isLamp ? "1" : "2";
+
+                            M.updateTextFields();
+                            M.FormSelect.init(document.querySelectorAll("select"));
+
+                            document.getElementById("btnGuardarEdicion")?.setAttribute("data-id", id!);
+
+                            const modal = document.getElementById("modalEditar");
+                            M.Modal.getInstance(modal!).open();
+                        });
+                    });
 
                     for (let o of devices) {
                         let checkbox = document.getElementById("cb_" + o.id);
@@ -137,8 +150,14 @@ class Main implements EventListenerObject{
 }
 
 window.addEventListener("load", () => {
-   let main: Main = new Main();
-     
+    let main: Main = new Main();
+    
+    const modals = document.querySelectorAll('.modal');
+    M.Modal.init(modals);
+
+    const selects = document.querySelectorAll('select');
+    M.FormSelect.init(selects);
+
     let btn = document.getElementById("btn_1");
    // let o: EventListenerObject = main;
     btn.addEventListener("click", main);
@@ -147,6 +166,38 @@ window.addEventListener("load", () => {
    // btnM.addEventListener("mouseover", main);
     btnM.addEventListener("click", main);
 
+    document.getElementById("btnGuardarEdicion")?.addEventListener("click", function (event) {
+        event.preventDefault();
+        const id = this.getAttribute("data-id");
+
+        const name = (document.getElementById("editName") as HTMLInputElement).value;
+        const description = (document.getElementById("editDescription") as HTMLInputElement).value;
+        const type = parseInt((document.getElementById("editType") as HTMLSelectElement).value);
+        console.log("Guardando edición:", { id, name, description, type });
+        if (id) {
+            fetch(`/devices/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name, description, type })
+            })
+            .then(res => res.json())
+            .then(data => {
+                M.toast({ html: `Dispositivo "${name}" actualizado`, classes: "green" });
+
+                const modal = document.getElementById("modalEditar");
+                M.Modal.getInstance(modal!).close();
+
+                main.consultarAlServidor();
+            })
+
+            .catch(err => {
+                M.toast({ html: `Error al actualizar dispositivo "${name}"`, classes: "red" });
+                console.error(err);
+            });
+        }
+    });
 
      let xmlReq = new XMLHttpRequest();
 
