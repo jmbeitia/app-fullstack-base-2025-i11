@@ -1,4 +1,5 @@
 
+declare const M: any;
 class Main implements EventListenerObject{
     nombre: string = "Matias";
     per: Persona = new Persona("", 3);
@@ -32,8 +33,34 @@ class Main implements EventListenerObject{
             console.log(elementoClick.id.substring(3, elementoClick.id.length));
             console.log(elementoClick)
             console.log(elementoClick.getAttribute("miIdBd"));
-            // TODO para la semana que viene
-            // llegar al backend y hacer un update a la tabla devices Con el id y el state;
+            const idDispositivo = elementoClick.getAttribute("miIdBd");
+            const nuevoEstado = elementoClick.checked ? 1 : 0;
+            const nombreDispositivo = elementoClick.closest("li")?.querySelector(".title")?.textContent || "Desconocido";
+
+            if (idDispositivo !== null) {
+                fetch(`/devices/${idDispositivo}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ state: nuevoEstado })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Respuesta del servidor:", data);
+                    M.toast({ 
+                        html: `El estado del dispositivo "${nombreDispositivo}" se actualizó correctamente.`, 
+                        classes: "green" 
+                    });
+                })
+                .catch(error => {
+                    console.error("Error al actualizar el estado:", error);
+                    M.toast({ 
+                        html: `Error actualizando el estado del dispositivo (${nombreDispositivo})`, 
+                        classes: "red" 
+                    });
+                });
+            }
         }
 
     }
@@ -79,7 +106,7 @@ class Main implements EventListenerObject{
                             <div class="switch">
                                 <label>
                                 Off
-                                <input id='cb_${o.id}' type="checkbox">
+                                <input id='cb_${o.id}' miIdBd='${o.id}' type="checkbox">
                                 <span class="lever"></span>
                                 On
                                 </label>
