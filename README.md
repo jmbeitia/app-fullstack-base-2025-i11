@@ -158,39 +158,261 @@ En esta sección podés ver los detalles específicos de funcionamiento del cód
 
 ### Agregar un dispositivo
 
-Completá los pasos para agregar un dispositivo desde el cliente web.
+Para agregar un nuevo dispositivo desde el cliente web, seguí estos pasos:
+
+1. **Visualizar los dispositivos existentes**
+
+   Hacé clic en el botón `Mostrar elementos` para cargar los dispositivos desde el backend. Esto habilita el botón flotante rojo con el ícono `+` en la esquina inferior derecha.
+
+2. **Abrir el formulario de agregado**
+
+   Hacé clic en el botón flotante `+`. Se abrirá un **modal de Materialize** con el formulario para ingresar los datos del nuevo dispositivo.
+
+3. **Completar los campos del formulario**
+
+   Ingresá los siguientes datos:
+
+   * **Nombre** del dispositivo (por ejemplo: "Lampara Escritorio").
+   * **Descripción** (por ejemplo: "Luz auxiliar para la noche").
+   * **Tipo**:
+
+     * `1`: Lámpara.
+     * `2`: Cortina u otros.
+   * **Dimerizable**: marcá el checkbox si el dispositivo puede tomar valores intermedios (por ejemplo, una lámpara con dimmer o una cortina con apertura gradual).
+
+4. **Confirmar agregado**
+
+   Presioná el botón `Agregar`. Si los datos son válidos, se enviará una solicitud `POST` al backend, y si es exitoso:
+
+   * Se mostrará un mensaje de confirmación.
+   * Se cerrará el modal automáticamente.
+   * Se actualizará la lista de dispositivos sin recargar la página.
+
+#### Detalles
+
+* El formulario usa componentes de **Materialize** (`input`, `select`, `checkbox`, `modal`) para asegurar una UI consistente y responsiva.
+* La solicitud al backend incluye el campo `dimerizable` como booleano y el estado inicial en `0`.
 
 ### Frontend
 
-Completá todos los detalles sobre cómo armaste el frontend, sus interacciones, etc.
+El frontend fue desarrollado en **TypeScript** sin framework, utilizando **MaterializeCSS** como biblioteca de componentes UI. El diseño y comportamiento sigue los principios de una **Single Page Application (SPA)** sin recarga de página, manejando los estados de la interfaz dinámicamente.
+
+#### Funcionalidades implementadas:
+
+* **Mostrar dispositivos**
+
+  Al hacer clic en el botón `Mostrar elementos`, se realiza una consulta al backend (`GET /devices`) y se renderiza la lista de dispositivos usando elementos de `Materialize` como `collection`, `avatar`, `switch` y `range`.
+
+* **Actualizar estado**
+
+  * Si el dispositivo **no es dimerizable**, se muestra un `switch` que permite cambiar el estado binario (0 ó 1).
+  * Si el dispositivo **es dimerizable**, se muestra un `input[type=range]` para controlar el valor entre `0` y `1` (con `step=0.01`).
+  * Ambos controles actualizan el estado del dispositivo mediante una solicitud `PUT /devices/:id`.
+
+* **Agregar dispositivo**
+
+  Un botón flotante `+` abre un modal (`#modalAgregar`) que permite ingresar:
+
+  * Nombre
+  * Descripción
+  * Tipo (`1` = lámpara, `2` = cortina)
+  * Dimerizable (`checkbox`)
+
+  La solicitud se envía al backend vía `POST /devices`.
+
+* **Editar dispositivo**
+
+  Cada dispositivo tiene un botón con ícono de lápiz que abre el modal de edición (`#modalEditar`). Al guardar, se envía un `PUT /devices/:id` con los campos modificados. El modal se cierra automáticamente y se actualiza la vista.
+
+* **Eliminar dispositivo**
+
+  Se incluye un botón con ícono de tacho para cada item. Al confirmar, se realiza un `DELETE /devices/:id` y se refresca la lista.
+
+* **Feedback visual**
+
+  Se utiliza `M.toast()` para mostrar notificaciones de éxito o error ante cualquier acción.
 
 ### Backend
 
-Completá todos los detalles de funcionamiento sobre el backend, sus interacciones con el cliente web, la base de datos, etc.
+El backend fue implementado usando **Node.js con Express**, manejando peticiones RESTful hacia una base de datos **MySQL arm64v8 8.0** por utilizar iOS. El conector utilizado es `mysql-connector.js`.
+
+#### Estructura de endpoints:
+
+* `GET /devices`
+  Devuelve todos los dispositivos con sus atributos: `id`, `name`, `description`, `type`, `state`, `dimerizable`.
+
+* `POST /devices`
+  Crea un nuevo dispositivo. Requiere el body con `name`, `description`, `type`, `state`, `dimerizable`.
+
+* `PUT /devices/:id`
+  Actualiza los datos de un dispositivo. Se permiten cambios parciales (por ejemplo, solo `state`, o `name` y `description`).
+
+* `DELETE /devices/:id`
+  Elimina el dispositivo con el ID correspondiente.
+
+#### Base de datos
+
+* Tabla: `Devices`
+* Columnas:
+
+  * `id` (INT, AUTO\_INCREMENT, PK)
+  * `name` (VARCHAR)
+  * `description` (VARCHAR)
+  * `type` (INT)
+  * `state` (DECIMAL(3,2)) – permite estados reales entre 0 y 1
+  * `dimerizable` (BOOLEAN) – indica si el dispositivo permite control de intensidad
+
+#### Consideraciones
+
+* El campo `state` se adaptó de `INT` a `DECIMAL(3,2)` para soportar valores intermedios.
+* El campo `dimerizable` fue agregado en el modelo y migrado en la base de datos.
+* Todas las respuestas están en formato JSON.
+
+Perfecto, a continuación te armo el contenido completo para la sección `<details><summary><b>Ver los endpoints disponibles</b></summary>`, incluyendo todos los endpoints implementados, sus métodos, headers, cuerpos de request/response, códigos y ejemplos:
+
 
 <details><summary><b>Ver los endpoints disponibles</b></summary><br>
 
-Completá todos los endpoints del backend con los metodos disponibles, los headers y body que recibe, lo que devuelve, ejemplos, etc.
+### 1) Obtener todos los dispositivos
 
-1) Devolver el estado de los dispositivos.
+**GET** `/devices`
+
+- **Headers:**
+  - `Content-Type: application/json`
+
+- **Request body:**  
+  *(no requiere)*
+
+- **Response:** `200 OK`
+```json
+[
+  {
+    "id": 1,
+    "name": "Lampara 1",
+    "description": "Luz living",
+    "state": 0.75,
+    "type": 1,
+    "dimerizable": true
+  },
+  {
+    "id": 2,
+    "name": "Persiana 1",
+    "description": "Persiana del comedor",
+    "state": 0,
+    "type": 2,
+    "dimerizable": false
+  }
+]
+````
+
+
+### 2) Crear un nuevo dispositivo
+
+**POST** `/devices`
+
+* **Headers:**
+
+  * `Content-Type: application/json`
+
+* **Request body:**
 
 ```json
 {
-    "method": "get",
-    "request_headers": "application/json",
-    "request_body": "",
-    "response_code": 200,
-    "request_body": {
-        "devices": [
-            {
-                "id": 1,
-                "status": true,
-                "description": "Kitchen light"
-            }
-        ]
-    },
+  "name": "Velador",
+  "description": "Velador habitación",
+  "type": 1,
+  "state": 0,
+  "dimerizable": true
 }
-``` 
+```
+
+* **Response:** `201 Created`
+
+```json
+{
+    "message": "Dispositivo creado",
+    "id": 7
+}
+```
+
+
+### 3) Actualizar un dispositivo
+
+**PUT** `/devices/:id`
+
+* **Headers:**
+
+  * `Content-Type: application/json`
+
+* **Request body:**
+  *(Puede contener uno o más de los siguientes campos)*
+
+```json
+{
+  "state": 1,
+  "description": "Luz plafon cocina"
+}
+```
+
+* **Response:** `200 OK`
+
+```json
+{
+    "message": "Dispositivo actualizado",
+    "updated_fields": {
+        "state": 1,
+        "description": "Luz plafon cocina"
+    }
+}
+```
+
+
+### 4) Eliminar un dispositivo
+
+**DELETE** `/devices/:id`
+
+* **Headers:**
+
+  * `Content-Type: application/json`
+
+* **Request body:**
+  *(no requiere)*
+
+* **Response:** `200 OK`
+
+```json
+{
+  "message": "Dispositivo eliminado"
+}
+```
+
+### 5) Obtener un dispositivo por ID
+
+**GET** `/devices/:id`
+
+* **Headers:**
+
+  * `Content-Type: application/json`
+
+* **Request body:**
+  *(no requiere)*
+
+* **Response:** `200 OK`
+
+```json
+[
+  {
+    "id": 3,
+    "name": "Velador",
+    "description": "Velador del living",
+    "state": 1,
+    "type": 1,
+    "dimerizable": true
+  }
+]
+```
+
+
 
 </details>
 
